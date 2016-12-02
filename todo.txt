@@ -1,0 +1,9 @@
+ - display state
+ - track pets state
+    - change the stats every 10 seconds and record to tb
+
+  - add user interaction
+
+
+
+set up requirement/virtual environment
