@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 # some helper functions
 # limit minimum stat value to 0 and max to 10
-def up_to_ten(x, y):
+def increase(x, y):
     if x < 10:
         x += y
         if x > 10:
@@ -12,22 +12,26 @@ def up_to_ten(x, y):
     return x
 
 
-def down_to_zero(x, y):
+def decrease(x, y):
     if x > 0:
         x -= y
         if x < 0:
             x = 0
     return x
 
-# Create your models here.
+
 class Species(m.Model):
 
     name = m.CharField(max_length=20)
     description = m.TextField(blank=True)
+
+    # Happiness increases with petting and decreases with time
     happiness_gain_rate = m.IntegerField(default=1)
     happiness_loss_rate = m.IntegerField(default=1)
-    fullness_gain_rate = m.IntegerField(default=1)
-    fullness_loss_rate = m.IntegerField(default=1)
+
+    # Hunger increases with time and decreases with feeding
+    hunger_gain_rate = m.IntegerField(default=1)
+    hunger_loss_rate = m.IntegerField(default=1)
 
     class Meta:
         verbose_name_plural = 'Species'
@@ -42,27 +46,33 @@ class Pet(m.Model):
     name = m.CharField(max_length=20)
     owner = m.ForeignKey(User)
     description = m.TextField(blank=True)
+
+    # The defaults will be used for all new pets
     current_happiness = m.IntegerField(default=5)
-    current_fullness = m.IntegerField(default=5)
+    current_hunger = m.IntegerField(default=5)
+
     happiness_gain_rate = m.IntegerField()
     happiness_loss_rate = m.IntegerField()
-    fullness_gain_rate = m.IntegerField()
-    fullness_loss_rate = m.IntegerField()
+
+    hunger_gain_rate = m.IntegerField()
+    hunger_loss_rate = m.IntegerField()
 
     def feed(self):
-        self.current_fullness = up_to_ten(self.current_fullness, self.fullness_gain_rate)
+        self.current_hunger = decrease(self.current_hunger, self.hunger_loss_rate)
         self.save()
 
     def gain_hunger(self):
-        self.current_fullness = down_to_zero(self.current_fullness, self.fullness_loss_rate)
+        self.current_hunger = increase(self.current_hunger, self.hunger_gain_rate)
+        print("{}'s hunger is {}".format(self.name, self.current_hunger))
         self.save()
 
     def pet(self):
-        self.current_happiness = up_to_ten(self.current_happiness, self.happiness_gain_rate)
+        self.current_happiness = increase(self.current_happiness, self.happiness_gain_rate)
         self.save()
 
     def lose_happiness(self):
-        self.current_happiness = down_to_zero(self.current_happiness, self.happiness_loss_rate)
+        self.current_happiness = decrease(self.current_happiness, self.happiness_loss_rate)
+        print("{}'s happiness is {}".format(self.name, self.current_happiness))
         self.save()
 
     def __str__(self):

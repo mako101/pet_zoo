@@ -1,8 +1,13 @@
 from django.shortcuts import render
 from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.detail import DetailView
+from django.views.generic.list import ListView
 
+# custom imports
+from pets.timer import RepeatedTimer as rt
 from pets.models import *
 from pets.forms import *
+from pets.mixins import *
 
 
 # Create your views here.
@@ -17,8 +22,6 @@ class PetCreateView(CreateView):
         # We take the stats from the selected species and pass them to this pet
         species = Species.objects.get(name=str(form.instance.species))
         form.instance.description = species.description
-        # form.instance.current_happiness = species.current_happiness
-        # form.instance.current_fullness = species.current_fullness
         form.instance.happiness_gain_rate = species.happiness_gain_rate
         form.instance.happiness_loss_rate = species.happiness_loss_rate
         form.instance.fullness_gain_rate = species.fullness_gain_rate
@@ -30,29 +33,23 @@ class PetCreateView(CreateView):
         return valid_data
 
 
+class PetListView(LoginRequiredMixin, ListView):
+
+    model = Pet
+
+    def get_queryset(self):
+        my_pets = Pet.objects.filter(owner=self.request.user)
+
+        # # this is when we start managing user's pets' stats
+        # for pet in my_pets:
+        #
+        #     # Change stats every x seconds
+        #     interval = 10
+        #     manage_hunger = rt(interval, pet.gain_hunger())
+        #     manage_happiness = rt(interval, pet.lose_happiness())
+
+        return my_pets.order_by('name')
 
 
 
 
-
-
-
-"""
-    Code to get attribute data:
-
-    In [6]: dog = Species.objects.get(name='Dog')
-
-    In [7]: dog.description
-    Out[7]: 'The easiest pet to raise!'
-
-    In [8]: foo = dog.description
-
-    In [9]: foo
-    Out[9]: 'The easiest pet to raise!'
-
-    In [10]: foo = dog.happiness_gain_rate
-
-    In [11]: foo
-    Out[11]: 3
-
-"""

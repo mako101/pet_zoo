@@ -25,7 +25,9 @@ class RepeatedTimer(object):
         self._timer.cancel()
         self.is_running = False
 
-def hello(name):
-    print("Hello %s!" % name)
 
-rt = RepeatedTimer(1, hello, "World")
+# Usage example
+# def hello(name):
+#     print("Hello %s!" % name)
+#
+# rt = RepeatedTimer(1, hello, "World")
