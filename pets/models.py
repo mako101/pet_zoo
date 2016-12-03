@@ -1,5 +1,10 @@
 from django.db import models as m
 from django.contrib.auth.models import User
+from django.db.models.signals import pre_delete
+
+from .apps import PetsConfig
+from pets.timer import RepeatedTimer as rt
+from pets.counter import PetStatCounter as psc
 
 
 # some helper functions
@@ -20,10 +25,14 @@ def decrease(x, y):
     return x
 
 
+# Templates for various pet types
 class Species(m.Model):
 
     name = m.CharField(max_length=20)
     description = m.TextField(blank=True)
+
+    # how often the pet's stats will change
+    stat_change_interval = m.IntegerField(default=20)
 
     # Happiness increases with petting and decreases with time
     happiness_gain_rate = m.IntegerField(default=1)
@@ -40,12 +49,14 @@ class Species(m.Model):
         return self.name
 
 
+# Pet inherits characteristics from its species + its own attributes
 class Pet(m.Model):
 
     species = m.ForeignKey(Species)
     name = m.CharField(max_length=20)
     owner = m.ForeignKey(User)
     description = m.TextField(blank=True)
+    stat_change_interval = m.IntegerField()
 
     # The defaults will be used for all new pets
     current_happiness = m.IntegerField(default=5)
@@ -63,7 +74,7 @@ class Pet(m.Model):
 
     def gain_hunger(self):
         self.current_hunger = increase(self.current_hunger, self.hunger_gain_rate)
-        print("{}'s hunger is {}".format(self.name, self.current_hunger))
+        # print("{}'s hunger is {}".format(self.name, self.current_hunger))
         self.save()
 
     def pet(self):
@@ -72,9 +83,25 @@ class Pet(m.Model):
 
     def lose_happiness(self):
         self.current_happiness = decrease(self.current_happiness, self.happiness_loss_rate)
-        print("{}'s happiness is {}".format(self.name, self.current_happiness))
+        # print("{}'s happiness is {}".format(self.name, self.current_happiness))
         self.save()
 
-    def __str__(self):
-        return "{} - {}'s {}".format(self.name,  str(self.owner).capitalize(), self.species)
+    # adds 2 jobs to the global scheduler using the name of the relevant pet
+    def start_counters(self):
+        interval = self.stat_change_interval
+        psc.add_job(self.gain_hunger, interval, str.lower('{}_hunger'.format(self.name)))
+        psc.add_job(self.lose_happiness, interval, str.lower('{}_happiness'.format(self.name)))
 
+    def __str__(self):
+        return "{} - {}'s {}".format(self.name, str(self.owner).capitalize(), self.species)
+
+
+def stop_counters(sender, instance, *args, **kwargs):
+
+    psc.remove_job(str.lower('{}_hunger'.format(instance.name)))
+    print('Deleted {} job'.format(str.lower('{}_hunger'.format(instance.name))))
+
+    psc.remove_job(str.lower('{}_happiness'.format(instance.name)))
+    print('Deleted {} job'.format(str.lower('{}_happiness'.format(instance.name))))
+
+pre_delete.connect(stop_counters, sender=Pet)

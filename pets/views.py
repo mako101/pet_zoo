@@ -22,12 +22,16 @@ class PetCreateView(CreateView):
         # We take the stats from the selected species and pass them to this pet
         species = Species.objects.get(name=str(form.instance.species))
         form.instance.description = species.description
+        form.instance.stat_change_interval = species.stat_change_interval
         form.instance.happiness_gain_rate = species.happiness_gain_rate
         form.instance.happiness_loss_rate = species.happiness_loss_rate
-        form.instance.fullness_gain_rate = species.fullness_gain_rate
-        form.instance.fullness_loss_rate = species.fullness_loss_rate
+        form.instance.hunger_gain_rate = species.hunger_gain_rate
+        form.instance.hunger_loss_rate = species.hunger_loss_rate
         form.instance.owner = self.request.user
         valid_data = super(PetCreateView, self).form_valid(form)
+
+        # start the stats counter for newly-created pet
+        form.instance.start_counters()
 
         print(valid_data)
         return valid_data

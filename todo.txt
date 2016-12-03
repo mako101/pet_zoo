@@ -7,3 +7,38 @@
 
 
 set up requirement/virtual environment
+
+
+
+
+Shell stuff:
+
+import django
+
+django.setup()
+
+import threading
+
+from pets.models import Pet
+
+from pets.counter import PetStatCounter
+
+
+
+
+from pets.timer import RepeatedTimer
+
+
+
+bo = Pet.objects.get(name='Bo')
+
+count_hunger =  RepeatedTimer(10, bo.gain_hunger, 'bo_hunger')
+
+count_hunger.start()
+
+bar =  RepeatedTimer(10, bo.lose_happiness, 'bo_happiness')
+
+bar.start()
+
+
+tl = [ t.name for t in threading.enumerate()]

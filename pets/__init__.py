@@ -1,2 +1,2 @@
-# default_app_config = 'pets.apps.PetsConfig'
+default_app_config = 'pets.apps.PetsConfig'
 

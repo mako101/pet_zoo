@@ -1,29 +1,46 @@
-from threading import Timer
+import threading
+
+
+
+
 
 class RepeatedTimer(object):
-    def __init__(self, interval, function, *args, **kwargs):
+    def __init__(self, interval, function, name, *args, **kwargs):
         self._timer     = None
         self.interval   = interval
         self.function   = function
+        self.name       = name
         self.args       = args
         self.kwargs     = kwargs
         self.is_running = False
         self.start()
 
+    def check_if_running(self):
+        thread_list = [t.name for t in threading.enumerate()]
+        if self.name in thread_list:
+            return True
+        else:
+            return False
+
     def _run(self):
-        self.is_running = False
+        # self.is_running = False
+        self.is_running = self.check_if_running()
         self.start()
         self.function(*self.args, **self.kwargs)
 
     def start(self):
         if not self.is_running:
-            self._timer = Timer(self.interval, self._run)
+            self._timer = threading.Timer(self.interval, self._run)
+            self._timer.setName(self.name)
             self._timer.start()
             self.is_running = True
 
     def stop(self):
         self._timer.cancel()
         self.is_running = False
+
+
+
 
 
 # Usage example
