@@ -1,29 +1,9 @@
 from django.db import models as m
 from django.contrib.auth.models import User
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, pre_save
 
-from .apps import PetsConfig
-from pets.timer import RepeatedTimer as rt
 from pets.counter import PetStatCounter as psc
-
-
-# some helper functions
-# limit minimum stat value to 0 and max to 10
-def increase(x, y):
-    if x < 10:
-        x += y
-        if x > 10:
-            x = 10
-    return x
-
-
-def decrease(x, y):
-    if x > 0:
-        x -= y
-        if x < 0:
-            x = 0
-    return x
-
+from . import model_helpers as mh
 
 # Templates for various pet types
 class Species(m.Model):
@@ -54,6 +34,7 @@ class Pet(m.Model):
 
     species = m.ForeignKey(Species)
     name = m.CharField(max_length=20)
+    slug = m.SlugField(blank=True)
     owner = m.ForeignKey(User)
     description = m.TextField(blank=True)
     stat_change_interval = m.IntegerField()
@@ -69,20 +50,20 @@ class Pet(m.Model):
     hunger_loss_rate = m.IntegerField()
 
     def feed(self):
-        self.current_hunger = decrease(self.current_hunger, self.hunger_loss_rate)
+        self.current_hunger = mh.decrease(self.current_hunger, self.hunger_loss_rate)
         self.save()
 
     def gain_hunger(self):
-        self.current_hunger = increase(self.current_hunger, self.hunger_gain_rate)
+        self.current_hunger = mh.increase(self.current_hunger, self.hunger_gain_rate)
         # print("{}'s hunger is {}".format(self.name, self.current_hunger))
         self.save()
 
     def pet(self):
-        self.current_happiness = increase(self.current_happiness, self.happiness_gain_rate)
+        self.current_happiness = mh.increase(self.current_happiness, self.happiness_gain_rate)
         self.save()
 
     def lose_happiness(self):
-        self.current_happiness = decrease(self.current_happiness, self.happiness_loss_rate)
+        self.current_happiness = mh.decrease(self.current_happiness, self.happiness_loss_rate)
         # print("{}'s happiness is {}".format(self.name, self.current_happiness))
         self.save()
 
@@ -96,12 +77,11 @@ class Pet(m.Model):
         return "{} - {}'s {}".format(self.name, str(self.owner).capitalize(), self.species)
 
 
-def stop_counters(sender, instance, *args, **kwargs):
+pre_save.connect(mh.create_slug, sender=Pet)
 
-    psc.remove_job(str.lower('{}_hunger'.format(instance.name)))
-    print('Deleted {} job'.format(str.lower('{}_hunger'.format(instance.name))))
+pre_delete.connect(mh.stop_counters, sender=Pet)
 
-    psc.remove_job(str.lower('{}_happiness'.format(instance.name)))
-    print('Deleted {} job'.format(str.lower('{}_happiness'.format(instance.name))))
 
-pre_delete.connect(stop_counters, sender=Pet)
+
+
+

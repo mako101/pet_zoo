@@ -1,9 +1,12 @@
  - display state
- - track pets state
+ - track pets state (mostly done)
     - change the stats every 10 seconds and record to tb
+    - add basic web gui to see if works ok (deleting pets)
 
   - add user interaction
 
+
+pets name may not be unique -> use slug!
 
 
 set up requirement/virtual environment
