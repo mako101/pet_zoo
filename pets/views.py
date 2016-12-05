@@ -5,27 +5,39 @@ from django.views.generic.list import ListView
 
 # API Stuff
 from pets.models import Pet
-from pets.serializers import PetSerializer
-from django.http import Http404
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from pets.serializers import PetSerializer, UserSerializer
+from rest_framework import generics as g, permissions as p
 
 # custom imports
 from pets.forms import *
 from pets.mixins import *
+from pets.permissions import IsOwnerOrReadOnly
 
 
-class PetList(ListCreateAPIView):
+class PetList(g.ListCreateAPIView):
     # my_pets = Pet.objects.filter(owner=self.request.user)
     queryset = Pet.objects.all()
     serializer_class = PetSerializer
+    permission_classes = (p.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
-class PetDetail(RetrieveUpdateDestroyAPIView):
+class PetDetail(g.RetrieveUpdateDestroyAPIView):
     queryset = Pet.objects.all()
     serializer_class = PetSerializer
+    permission_classes = (p.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+
+
+class UserList(g.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(g.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 # class PetList(APIView):
 #     """

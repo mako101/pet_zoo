@@ -35,7 +35,8 @@ class Pet(m.Model):
     species = m.ForeignKey(Species)
     name = m.CharField(max_length=20)
     slug = m.SlugField(blank=True)
-    owner = m.ForeignKey(User)
+    # related name makes it avaiable as a User model attribute
+    owner = m.ForeignKey(User, related_name='pets', on_delete=m.CASCADE)
     description = m.TextField(blank=True)
     stat_change_interval = m.IntegerField()
 

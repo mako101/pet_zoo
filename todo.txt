@@ -6,8 +6,7 @@
   - add user interaction
 
 
-pets name may not be unique -> use slug!
-
+- update all URLs so that they make sense
 
 set up requirement/virtual environment
 
