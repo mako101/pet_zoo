@@ -4,18 +4,44 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
 # API Stuff
-from pets.models import Pet
-from pets.serializers import PetSerializer, UserSerializer
-from rest_framework import generics as g, permissions as p
+from pets.serializers import PetSerializer, SpeciesSerializer, UserSerializer
+from rest_framework import (
+                            generics as g,
+                            permissions as p,
+                            viewsets as v)
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.reverse import reverse
 
 # custom imports
+# from pets.models import Pet, Species
 from pets.forms import *
 from pets.mixins import *
 from pets.permissions import IsOwnerOrReadOnly
 
 
+@api_view(['GET'])
+def api_root(request):
+    return Response({
+        'users': reverse('user-list', request=request),
+        'pets': reverse('pet-list', request=request),
+        'species': reverse('species-list', request=request),
+    })
+
+
+class SpeciesList(g.ListCreateAPIView):
+    queryset = Species.objects.all()
+    serializer_class = SpeciesSerializer
+    # permission_classes = (p.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+
+
+class SpeciesDetail(g.RetrieveUpdateDestroyAPIView):
+    queryset = Species.objects.all()
+    serializer_class = SpeciesSerializer
+    permission_classes = (p.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+
+
 class PetList(g.ListCreateAPIView):
-    # my_pets = Pet.objects.filter(owner=self.request.user)
     queryset = Pet.objects.all()
     serializer_class = PetSerializer
     permission_classes = (p.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
@@ -29,6 +55,12 @@ class PetDetail(g.RetrieveUpdateDestroyAPIView):
     serializer_class = PetSerializer
     permission_classes = (p.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
 
+#
+# # User listing + details
+# class UserViewSet(v.ReadOnlyModelViewSet):
+#
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
 
 class UserList(g.ListAPIView):
     queryset = User.objects.all()
@@ -38,98 +70,6 @@ class UserList(g.ListAPIView):
 class UserDetail(g.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
-# class PetList(APIView):
-#     """
-#     List all snippets, or create a new snippet.
-#     """
-#     def get(self, request):
-#         pets = Pet.objects.all()
-#         serializer = PetSerializer(pets, many=True)
-#         return Response(serializer.data)
-#
-#     def post(self, request):
-#         serializer = PetSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#
-# class PetDetail(APIView):
-#     """
-#     Retrieve, update or delete a snippet instance.
-#     """
-#
-#     def get_object(self, pk):
-#         try:
-#             return Pet.objects.get(pk=pk)
-#         except Pet.DoesNotExist:
-#             raise Http404
-#
-#     def get(self, request, pk):
-#         pet = self.get_object(pk)
-#         serializer = PetSerializer(pet)
-#         return Response(serializer.data)
-#
-#     def put(self, request, pk):
-#         pet = self.get_object(pk)
-#         serializer = PetSerializer(pet, data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#     def delete(self, request, pk):
-#         pet = self.get_object(pk)
-#         pet.delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# # @csrf_exempt
-# @api_view(['GET', 'POST'])
-# def pet_list(request):
-#     """
-#     List all code pets, or create a new pet.
-#     """
-#     if request.method == 'GET':
-#         pets = Pet.objects.all()
-#         serializer = PetSerializer(pets, many=True)
-#         return Response(serializer.data)
-#
-#     elif request.method == 'POST':
-#         serializer = PetSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#
-# # @csrf_exempt
-# @api_view(['GET', 'PUT', 'DELETE'])
-# def pet_detail(request, pk):
-#     """
-#     Retrieve, update or delete a pet.
-#     """
-#     try:
-#         pet = Pet.objects.get(pk=pk)
-#     except Pet.DoesNotExist:
-#         return HttpResponse(status=status.HTTP_404_NOT_FOUND)
-#
-#     if request.method == 'GET':
-#         serializer = PetSerializer(pet)
-#         return Response(serializer.data)
-#
-#     elif request.method == 'PUT':
-#         serializer = PetSerializer(pet, data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#     elif request.method == 'DELETE':
-#         pet.delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 ##################### Class Based Views ######################

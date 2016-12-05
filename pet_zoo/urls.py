@@ -8,14 +8,15 @@ from pets import views as p
 router = routers.DefaultRouter()
 # router.register(r'users', UserViewSet)
 
-
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^admin/', admin.site.urls),
-    url(r'^api/', include('rest_framework.urls')),
-    url(r'^pets/', include('pets.urls')),
-    url(r'^api/users/$', p.UserList.as_view()),
-    url(r'^api/users/(?P<pk>\d+)$', p.UserDetail.as_view()),
-
+    url(r'^api/$', p.api_root),
+    url(r'^api-auth/', include('rest_framework.urls')),
+    url(r'^api/species/$', p.SpeciesList.as_view(), name='species-list'),
+    url(r'^api/species/(?P<pk>\d+)$', p.SpeciesDetail.as_view(), name='species-detail'),
+    url(r'^api/users/$', p.UserList.as_view(), name='user-list'),
+    url(r'^api/users/(?P<pk>\d+)$', p.UserDetail.as_view(), name='user-detail'),
+    url(r'^api/pets/', include('pets.urls')),
 
 ]

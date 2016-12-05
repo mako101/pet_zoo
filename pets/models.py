@@ -32,11 +32,11 @@ class Species(m.Model):
 # Pet inherits characteristics from its species + its own attributes
 class Pet(m.Model):
 
-    species = m.ForeignKey(Species)
+    species = m.ForeignKey(Species, related_name='pets')
     name = m.CharField(max_length=20)
     slug = m.SlugField(blank=True)
     # related name makes it avaiable as a User model attribute
-    owner = m.ForeignKey(User, related_name='pets', on_delete=m.CASCADE)
+    owner = m.ForeignKey(User, related_name='owned_pets', on_delete=m.CASCADE)
     description = m.TextField(blank=True)
     stat_change_interval = m.IntegerField()
 
