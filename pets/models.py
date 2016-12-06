@@ -52,20 +52,22 @@ class Pet(m.Model):
 
     def feed(self):
         self.current_hunger = mh.decrease(self.current_hunger, self.hunger_loss_rate)
+        print("{}'s hunger is {}".format(self.name, self.current_hunger))
         self.save()
 
     def gain_hunger(self):
         self.current_hunger = mh.increase(self.current_hunger, self.hunger_gain_rate)
-        # print("{}'s hunger is {}".format(self.name, self.current_hunger))
+        print("{}'s hunger is {}".format(self.name, self.current_hunger))
         self.save()
 
     def pet(self):
         self.current_happiness = mh.increase(self.current_happiness, self.happiness_gain_rate)
+        print("{}'s happiness is {}".format(self.name, self.current_happiness))
         self.save()
 
     def lose_happiness(self):
         self.current_happiness = mh.decrease(self.current_happiness, self.happiness_loss_rate)
-        # print("{}'s happiness is {}".format(self.name, self.current_happiness))
+        print("{}'s happiness is {}".format(self.name, self.current_happiness))
         self.save()
 
     # adds 2 jobs to the global scheduler using the name of the relevant pet

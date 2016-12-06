@@ -15,9 +15,14 @@ class UserSerializer(s.HyperlinkedModelSerializer):
         fields = ('url', 'username', 'owned_pets')
 
 
-class PetSerializer(s.HyperlinkedModelSerializer):
+class PetSerializer(s.ModelSerializer):
 
     owner = s.ReadOnlyField(source='owner.username')
+    # feed = s.HyperlinkedIdentityField(view_name='pet-feed')
+    # pet = s.HyperlinkedIdentityField(view_name='pet-pet')
+    current_happiness = s.ReadOnlyField()
+    current_hunger = s.ReadOnlyField()
+    # species = s.CharField()
 
     class Meta:
         model = Pet

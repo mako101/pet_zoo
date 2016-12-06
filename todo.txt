@@ -8,6 +8,11 @@
 
 - update all URLs so that they make sense
 
+- fix ticker
+- implement create pet via api
+- bug with deleting
+
+
 set up requirement/virtual environment
 
 
