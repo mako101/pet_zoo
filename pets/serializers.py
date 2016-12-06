@@ -22,12 +22,12 @@ class PetSerializer(s.ModelSerializer):
     # pet = s.HyperlinkedIdentityField(view_name='pet-pet')
     current_happiness = s.ReadOnlyField()
     current_hunger = s.ReadOnlyField()
-    # species = s.CharField()
+    description = s.ReadOnlyField()
 
     class Meta:
         model = Pet
-        fields = ('id', 'url', 'name', 'owner',  'species',
-                  'current_happiness', 'current_hunger')
+        fields = ('id', 'url', 'name', 'owner', 'species',
+                  'description', 'current_happiness', 'current_hunger')
 
 
 class SpeciesSerializer(s.HyperlinkedModelSerializer):
