@@ -12,6 +12,12 @@
 - implement create pet via api
 - bug with deleting
 
+TESTING + Manual
+
+ add users + couple of pets -> reset passwords
+
+ explain secheduler
+  explain django admin
 
 set up requirement/virtual environment
 
